@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=debian
+ARG BASE_IMAGE=ubuntu
 
 FROM ${BASE_IMAGE} as build
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,14 +13,15 @@ RUN apt update && \
       libcap2-bin \
       ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-RUN setcap cap_net_bind_service=+ep /usr/bin/python
+RUN setcap cap_net_bind_service=+ep $(readlink -f $(which python3))
 ENTRYPOINT ["tini", "-g", "--"]
 
 FROM build as source
-RUN apt install -y git
+RUN apt update && apt install -y git
 RUN git clone https://github.com/alexbers/mtprotoproxy /mtproto
 
 FROM build 
+RUN useradd tgproxy -u 70000
 USER tgproxy
 WORKDIR /home/tgproxy/
 COPY --from=source --chown=tgproxy /mtproto/mtprotoproxy.py /mtproto/config.py /home/tgproxy/
