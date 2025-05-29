@@ -1,0 +1,19 @@
+networks:
+  teleproxy_network:
+    name: teleproxy_network
+
+services:
+  teleproxy:
+    image: hieupth/teleproxy
+    container_name: teleproxy
+    restart: unless-stopped
+    networks:
+      - teleproxy_network
+    ports:
+      - 7443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
